@@ -1,0 +1,12 @@
+http://localhost:2115/introduce?user=me&friend=jane&host=localhost&port=2115
+http://localhost:2115/befriend?user=me&friends=bob
+http://localhost:2115/befriend?user=alice&friends=jane
+
+
+buf Without any friends
+
+"\r\n\000tent-type: text/html; charset=utf-8\r\n\000:1573420426|23:usernam
+e-localhost-8889|44:MTVmN2U2MDk2M2EyNGI4ZTk3OTdkZWE5OWMxZDNjM2U=|4f6957f264c4ccd
+7178bd5440a8a27e54f67aaf69440cf979496af1b057f261f\"; usern"
+
+buf With friends:

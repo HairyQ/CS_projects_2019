@@ -1,0 +1,92 @@
+#include <iostream>
+#include <cstdlib>
+
+extern "C"
+{
+#include "../ffmpeg/include/libavcodec/avcodec.h"
+#include "../ffmpeg/include/libavutil/avutil.h"
+#include "../ffmpeg/include/libavutil/imgutils.h"
+#include "../ffmpeg/include/libavformat/avformat.h"
+}
+
+int main(int argc, char* argv[])
+{
+  if (argc > 2) // Too many arguments - we just need a jpg file
+    {
+      std::cout << "Only single argument accepted" << std::endl;
+      return 0;
+    }
+
+  AVFormatContext *fmtCtx = NULL;
+  AVInputFormat *fmt = av_find_input_format("mjpeg");
+
+  //Try to open the file and populate fmtCtx with info from the file
+  if (avformat_open_input(&fmtCtx, argv[1], fmt, NULL) != 0)
+    {
+      std::cout << "Correct format not achieved!" << std::endl;
+      return -1;
+    }
+
+  //Populates fmtCtx with info related to streams found in the jpg
+  if (avformat_find_stream_info(fmtCtx, NULL) < 0)
+    return -1;
+
+
+  /*
+    ////////////////////////////////////////////////////////////
+    Referenced code from: 
+    http://random-stuff-mine.blogspot.com/2014/01/decoding-jpeg-image-file-using-libavcodec.html
+   */
+  int streamIndex = -1;
+
+  //Iterate through the number of streams, until you find the video stream
+  //(A jpg file isn't going to contain any other streams than a video stream)
+  for (int i = 0; i < fmtCtx->nb_streams; i++)
+    {
+      if (fmtCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+	  streamIndex = i;
+    }
+
+  //Find the codec defined by the stream, so that you're able to decode the frame in the end
+  AVCodecContext *cdcCtx = fmtCtx->streams[streamIndex]->codec;
+  AVCodec *picCodec = avcodec_find_decoder(cdcCtx->codec_id);
+  if (picCodec == NULL)
+    std::cout << "No Codec" << std::endl;
+
+  if (streamIndex != -1) // Determine if a stream was found in the jpg passed in
+    std::cout << "Stream Index : " << streamIndex << std::endl;
+
+  AVPacket picPacket;
+  av_init_packet(&picPacket); // Initialize an empty packet object
+
+  picPacket.data = NULL;
+  picPacket.size = 0;
+
+  // Try to populate picPacket with the frame contained in fmtCtx
+  if (av_read_frame(fmtCtx, &picPacket) < 0)
+    {
+      std::cout << "Frame not read!" << std::endl;
+      av_free_packet(&picPacket);
+      avcodec_close(cdcCtx);
+    }
+
+  int frameFinished = 0;
+  AVFrame *decodedFrame = av_frame_alloc();
+  avcodec_decode_video2(cdcCtx, decodedFrame, &frameFinished, &picPacket);
+
+  if (frameFinished == 1)
+    std::cout << "Frame was decoded successfully!" << std::endl;
+  else
+    std::cout << "Frame was NOT decoded successfully :(" << std::endl;
+
+  delete cdcCtx;
+  av_free_packet(&picPacket);
+  av_frame_free(&decodedFrame);
+  /*
+    ////////////////////////////////////////////////////////////////
+    end of code referring to citation
+   */
+  delete fmtCtx;
+
+  std::cout << "Bouncer.cpp executed" << std::endl;
+}

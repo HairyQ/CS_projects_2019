@@ -1,0 +1,24 @@
+﻿Testing main function called
+Test 00: testing contains
+Test 01: testing contains
+Test 02: remove function
+Contents: hello, WORLD, Three, six, The, Moose, wINE,
+Test 03: remove what's not there
+Test 04: Testing get_elements() function
+Adding strings "One" through "Five"
+contents:
+First, Second, Third, Fourth, Fifth,
+Removing strings "Second" and "Fourth"
+Contents:
+First, Third, Fifth,
+Adding string "Sixth", and removing "First"
+Contents:
+Third, Fifth, Sixth,
+Removing both the head and tail - removing "Third" and "Sixth"
+Contents:
+Fifth,
+Test 05: Assignment Operator
+new_set contents: It, is, getting, late, and, I'm, tired,
+newer_set contents: It, is, getting, late, and, I'm, tired,
+Testing self-assignment
+End of tests reached
